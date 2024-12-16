@@ -1,0 +1,45 @@
+- op: add
+  path: /machine/network
+  value:
+    hostname: ${hostname}
+    nameservers:
+%{ for ns in nameservers ~}
+      - ${ns}
+%{ endfor ~}
+    interfaces:
+      - interface: ens18
+        dhcp: false
+        vlans:
+          - vlanId: ${public_vlanid}
+            addresses:
+              - ${public_address}/${public_netmask}
+            routes:
+              - network: 0.0.0.0/0
+                gateway: ${public_gateway}
+            dhcp: false
+      - interface: ens19
+        dhcp: false
+        vlans:
+          - vlanId: ${private_vlanid}
+            addresses:
+              - ${private_address}/${private_netmask}
+            dhcp: false
+
+- op: add
+  path: /machine/install
+  value:
+    disk: /dev/sda
+    image: factory.talos.dev/installer/d4b0d1ab654f65788d2a7655181799a6478bc531a420bc3b154ade46e974c130:v1.7.7
+    wipe: false
+
+- op: add
+  path: /machine/time
+  value:
+    servers:
+      - 0.asia.pool.ntp.org
+
+- op: add
+  path: /machine/kubelet/nodeIP
+  value:
+    validSubnets:
+      - ${subnet}
